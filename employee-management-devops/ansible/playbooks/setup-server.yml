@@ -1,0 +1,37 @@
+---
+# Server Baseline Setup Playbook
+- name: Hardening and base server setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure UFW firewall default incoming is deny
+      ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Ensure UFW firewall default outgoing is allow
+      ufw:
+        direction: outgoing
+        policy: allow
+
+    - name: Allow SSH port through firewall
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow HTTP port on webservers
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+      when: "'webservers' in group_names"
+
+    - name: Enable UFW firewall
+      ufw:
+        state: enabled
+
+    - name: Ensure unattended security upgrades are installed
+      apt:
+        name: unattended-upgrades
+        state: present

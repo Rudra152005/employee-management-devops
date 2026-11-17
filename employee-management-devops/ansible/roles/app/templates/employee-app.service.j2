@@ -1,0 +1,18 @@
+[Unit]
+Description=Gunicorn instance serving Employee Management System
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group={{ app_group }}
+WorkingDirectory={{ app_root_dir }}/application
+Environment="PATH={{ app_root_dir }}/venv/bin"
+EnvironmentFile={{ app_root_dir }}/application/.env
+ExecStart={{ app_root_dir }}/venv/bin/gunicorn --workers {{ gunicorn_workers }} --bind {{ gunicorn_bind }} --timeout {{ gunicorn_timeout }} "run:app"
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Dashboard{% endblock %}
+{% block page_title %}Executive Dashboard{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('employee.add') }}" class="btn btn-sm btn-primary me-2">
+  <i class="fa-solid fa-user-plus me-1"></i> Add Employee
+</a>
+<a href="{{ url_for('employee.export_csv') }}" class="btn btn-sm btn-outline-secondary">
+  <i class="fa-solid fa-file-export me-1"></i> Export Data
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- KPI Stats Cards Row -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card kpi-card p-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Total Employees</span>
+          <h2 class="fw-bold mt-1 mb-0">{{ metrics.total_employees }}</h2>
+        </div>
+        <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+      <div class="mt-2 text-success small">
+        <i class="fa-solid fa-arrow-trend-up me-1"></i> Across all branches
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card kpi-card p-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Active Staff</span>
+          <h2 class="fw-bold mt-1 mb-0">{{ metrics.active_employees }}</h2>
+        </div>
+        <div class="kpi-icon bg-success bg-opacity-10 text-success">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+      </div>
+      <div class="mt-2 text-muted small">
+        <span class="text-success fw-semibold">{{ (metrics.active_employees / (metrics.total_employees or 1) * 100)|round|int }}%</span> operational active
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card kpi-card p-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Departments</span>
+          <h2 class="fw-bold mt-1 mb-0">{{ metrics.total_departments }}</h2>
+        </div>
+        <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+          <i class="fa-solid fa-building"></i>
+        </div>
+      </div>
+      <div class="mt-2 text-muted small">
+        <a href="{{ url_for('department.index') }}" class="text-decoration-none text-muted">Manage departments &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card kpi-card p-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Average Salary</span>
+          <h2 class="fw-bold mt-1 mb-0">${{ "{:,.0f}".format(metrics.average_salary) }}</h2>
+        </div>
+        <div class="kpi-icon bg-info bg-opacity-10 text-info">
+          <i class="fa-solid fa-money-bill-wave"></i>
+        </div>
+      </div>
+      <div class="mt-2 text-muted small">
+        Per employee annum
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Middle Section: Chart & Recent Additions -->
+<div class="row g-4 mb-4">
+  <!-- Chart Column -->
+  <div class="col-lg-5">
+    <div class="card content-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0">Department Distribution</h5>
+        <span class="badge bg-light text-dark border">Headcount</span>
+      </div>
+      <div style="height: 280px; position: relative;">
+        <canvas id="departmentChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Hires Column -->
+  <div class="col-lg-7">
+    <div class="card content-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0">Recent Hires</h5>
+        <a href="{{ url_for('employee.index') }}" class="small text-primary text-decoration-none">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Employee</th>
+              <th>Department</th>
+              <th>Hire Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for emp in metrics.recent_hires %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-initials me-2">
+                    {{ emp.first_name[0] }}{{ emp.last_name[0] }}
+                  </div>
+                  <div>
+                    <div class="fw-semibold text-dark">{{ emp.full_name }}</div>
+                    <div class="small text-muted">{{ emp.job_title }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ emp.department.name if emp.department else 'N/A' }}</td>
+              <td class="small">{{ emp.hire_date.strftime('%b %d, %Y') }}</td>
+              <td>
+                {% if emp.status == 'Active' %}
+                  <span class="badge badge-active rounded-pill px-2 py-1">Active</span>
+                {% elif emp.status == 'On Leave' %}
+                  <span class="badge badge-onleave rounded-pill px-2 py-1">On Leave</span>
+                {% else %}
+                  <span class="badge badge-terminated rounded-pill px-2 py-1">Terminated</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">No recent hires found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.deptLabels = {{ metrics.dept_labels | tojson }};
+  window.deptCounts = {{ metrics.dept_counts | tojson }};
+</script>
+{% endblock %}

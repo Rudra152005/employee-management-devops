@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Employee - {{ employee.full_name }}{% endblock %}
+{% block page_title %}Edit Employee Record{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('employee.index') }}" class="btn btn-outline-secondary btn-sm">
+  <i class="fa-solid fa-arrow-left me-1"></i> Back to Directory
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card content-card p-4">
+      <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+        <div class="avatar-initials me-3 fs-5" style="width: 48px; height: 48px;">
+          {{ employee.first_name[0] }}{{ employee.last_name[0] }}
+        </div>
+        <div>
+          <h5 class="fw-bold text-dark mb-0">{{ employee.full_name }}</h5>
+          <span class="small text-muted">ID: EMP-{{ "%04d"|format(employee.id) }} &bull; Hired {{ employee.hire_date.strftime('%b %d, %Y') }}</span>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('employee.edit', employee_id=employee.id) }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">First Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="first_name" value="{{ employee.first_name }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Last Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="last_name" value="{{ employee.last_name }}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Work Email Address <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" name="email" value="{{ employee.email }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" value="{{ employee.phone or '' }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Job Title / Designation <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="job_title" value="{{ employee.job_title }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Department <span class="text-danger">*</span></label>
+            <select class="form-select" name="department_id" required>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}" {% if employee.department_id == dept.id %}selected{% endif %}>
+                  {{ dept.name }} ({{ dept.code }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Base Annual Salary ($) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" min="0" class="form-control" name="salary" value="{{ employee.salary }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Hire Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="hire_date" value="{{ employee.hire_date.strftime('%Y-%m-%d') }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Status</label>
+            <select class="form-select" name="status">
+              <option value="Active" {% if employee.status == 'Active' %}selected{% endif %}>Active</option>
+              <option value="On Leave" {% if employee.status == 'On Leave' %}selected{% endif %}>On Leave</option>
+              <option value="Terminated" {% if employee.status == 'Terminated' %}selected{% endif %}>Terminated</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+          <a href="{{ url_for('employee.index') }}" class="btn btn-light me-2">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Update Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

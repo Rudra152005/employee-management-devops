@@ -1,0 +1,12 @@
+---
+gunicorn_workers: 4
+gunicorn_timeout: 60
+gunicorn_bind: "127.0.0.1:5000"
+flask_env: production
+db_host: "10.0.20.15"
+db_port: 3306
+db_name: "employeedb"
+db_user: "app_user"
+db_password: "AppUserSecret2026!"
+secret_key: "ansible-managed-production-secret-key"
+jwt_secret_key: "ansible-managed-jwt-production-secret-key"

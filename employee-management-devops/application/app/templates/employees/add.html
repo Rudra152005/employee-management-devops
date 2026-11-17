@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Employee{% endblock %}
+{% block page_title %}New Employee Registration{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('employee.index') }}" class="btn btn-outline-secondary btn-sm">
+  <i class="fa-solid fa-arrow-left me-1"></i> Back to Directory
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card content-card p-4">
+      <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">Personal & Position Information</h5>
+
+      <form method="POST" action="{{ url_for('employee.add') }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">First Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="first_name" required placeholder="e.g. Michael">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Last Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="last_name" required placeholder="e.g. Scott">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Work Email Address <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" name="email" required placeholder="m.scott@enterprise.io">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" placeholder="+1-555-0199">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Job Title / Designation <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="job_title" required placeholder="e.g. Senior DevOps Architect">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-muted">Department <span class="text-danger">*</span></label>
+            <select class="form-select" name="department_id" required>
+              <option value="" disabled selected>Select Department...</option>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Base Annual Salary ($) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" min="0" class="form-control" name="salary" required placeholder="85000.00">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Hire Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="hire_date" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted">Status</label>
+            <select class="form-select" name="status">
+              <option value="Active" selected>Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Terminated">Terminated</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+          <a href="{{ url_for('employee.index') }}" class="btn btn-light me-2">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="fa-solid fa-check me-1"></i> Save Employee
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

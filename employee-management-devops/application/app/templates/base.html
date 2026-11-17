@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Enterprise Employee Portal{% endblock %} - DevOps Platform</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav class="col-md-3 col-lg-2 d-md-block sidebar py-3 collapse" id="sidebarMenu">
+        <div class="position-sticky pt-2">
+          <div class="d-flex align-items-center px-3 mb-4 text-white">
+            <i class="fa-solid fa-cube text-primary fs-3 me-2"></i>
+            <span class="fs-5 fw-bold">DevOps Portal</span>
+          </div>
+
+          <ul class="nav flex-column px-2">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'auth.dashboard' %}active{% endif %}" href="{{ url_for('auth.dashboard') }}">
+                <i class="fa-solid fa-chart-pie me-2"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if 'employee' in request.endpoint %}active{% endif %}" href="{{ url_for('employee.index') }}">
+                <i class="fa-solid fa-users me-2"></i> Employees
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if 'department' in request.endpoint %}active{% endif %}" href="{{ url_for('department.index') }}">
+                <i class="fa-solid fa-building me-2"></i> Departments
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('api.get_stats') }}" target="_blank">
+                <i class="fa-solid fa-code me-2"></i> REST API Stats
+              </a>
+            </li>
+            <li class="nav-item mt-4 pt-3 border-top border-secondary">
+              <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Sign Out
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Main Body Content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        <!-- Top Navbar -->
+        <header class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
+          <h1 class="h3 fw-semibold text-dark">{% block page_title %}Dashboard{% endblock %}</h1>
+          <div class="btn-toolbar mb-2 mb-md-0 d-flex align-items-center">
+            <span class="me-3 text-muted small">
+              <i class="fa-solid fa-circle-user text-primary fs-5 me-1 align-middle"></i>
+              Signed in as <strong>{{ current_user.username }}</strong> ({{ current_user.role|capitalize }})
+            </span>
+            {% block page_actions %}{% endblock %}
+          </div>
+        </header>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% if error_title %}
+          <div class="card p-5 text-center content-card my-4">
+            <h2 class="text-danger mb-3">{{ error_title }}</h2>
+            <p class="text-muted fs-5">{{ error_message }}</p>
+            <div class="mt-3">
+              <a href="{{ url_for('auth.dashboard') }}" class="btn btn-primary">Return to Dashboard</a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% else %}
+  <!-- Unauthenticated (Login) Layout -->
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="row justify-content-center mt-4">
+          <div class="col-md-5">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block unauth_content %}{% endblock %}
+  </div>
+  {% endif %}
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Custom App JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

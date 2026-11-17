@@ -1,0 +1,10 @@
+---
+environment_name: production
+app_name: employee-management
+app_user: appuser
+app_group: appuser
+app_root_dir: /opt/employee-app
+app_repo_url: "https://github.com/enterprise/employee-management-devops.git"
+app_port: 5000
+timezone: "UTC"
+sysadmin_email: "devops-alerts@enterprise.io"

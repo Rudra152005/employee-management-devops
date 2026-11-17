@@ -1,0 +1,46 @@
+---
+# Rolling Zero-Downtime Application Deployment Playbook
+- name: Deploy application update to application server fleet
+  hosts: app_servers
+  serial: 1 # Deploy one host at a time for zero downtime
+  become: yes
+  vars:
+    git_branch: main
+
+  tasks:
+    - name: Pull latest application source code from repository
+      git:
+        repo: "{{ app_repo_url }}"
+        dest: "{{ app_root_dir }}/application"
+        version: "{{ git_branch }}"
+        force: yes
+      notify: restart employee-app
+      ignore_errors: yes
+
+    - name: Update Python dependencies
+      pip:
+        requirements: "{{ app_root_dir }}/application/requirements.txt"
+        virtualenv: "{{ app_root_dir }}/venv"
+
+    - name: Restart employee-app systemd service
+      systemd:
+        name: employee-app
+        state: restarted
+
+    - name: Await service stabilization
+      pause:
+        seconds: 5
+
+    - name: Verify health endpoint returns 200 OK
+      uri:
+        url: "http://127.0.0.1:5000/health"
+        status_code: 200
+        timeout: 10
+      register: deploy_health
+      retries: 6
+      delay: 5
+      until: deploy_health.status == 200
+
+    - name: Report deployment success
+      debug:
+        msg: "Deployment succeeded on {{ inventory_hostname }}. Node is healthy."

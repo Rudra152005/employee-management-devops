@@ -1,0 +1,36 @@
+upstream employee_flask {
+    server {{ gunicorn_bind }};
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    client_max_body_size 20M;
+
+    # Static assets caching
+    location /static/ {
+        alias {{ app_root_dir }}/application/app/static/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    # Health check bypass straight to app
+    location /health {
+        proxy_pass http://employee_flask/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Main application reverse proxy
+    location / {
+        proxy_pass http://employee_flask;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 90;
+        proxy_connect_timeout 90;
+    }
+}

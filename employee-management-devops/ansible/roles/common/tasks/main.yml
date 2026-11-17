@@ -1,0 +1,41 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install baseline system packages
+  apt:
+    name:
+      - curl
+      - git
+      - ufw
+      - htop
+      - build-essential
+      - chrony
+      - ca-certificates
+      - software-properties-common
+    state: present
+
+- name: Ensure Chrony NTP service is running
+  service:
+    name: chrony
+    state: started
+    enabled: yes
+
+- name: Set system timezone
+  timezone:
+    name: "{{ timezone }}"
+
+- name: Create dedicated application service group
+  group:
+    name: "{{ app_group }}"
+    state: present
+
+- name: Create dedicated application service user
+  user:
+    name: "{{ app_user }}"
+    group: "{{ app_group }}"
+    shell: /bin/bash
+    home: "{{ app_root_dir }}"
+    create_home: yes

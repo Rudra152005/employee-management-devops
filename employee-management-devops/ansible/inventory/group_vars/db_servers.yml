@@ -1,0 +1,8 @@
+---
+mysql_port: 3306
+mysql_bind_address: "0.0.0.0"
+mysql_root_password: "RootAdminPassword2026!"
+mysql_database: "employeedb"
+mysql_user: "app_user"
+mysql_password: "AppUserSecret2026!"
+mysql_max_connections: 250

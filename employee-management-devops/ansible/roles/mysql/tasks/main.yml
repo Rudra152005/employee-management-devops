@@ -1,0 +1,39 @@
+---
+- name: Install MySQL server and Python MySQL connector
+  apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+
+- name: Deploy tuned MySQL configuration
+  template:
+    src: my.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart mysql
+
+- name: Ensure MySQL service is running and enabled
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Create application database
+  mysql_db:
+    name: "{{ mysql_database }}"
+    state: present
+    encoding: utf8mb4
+    collation: utf8mb4_unicode_ci
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Create database application user with privileges
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    priv: "{{ mysql_database }}.*:ALL"
+    host: "%"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock

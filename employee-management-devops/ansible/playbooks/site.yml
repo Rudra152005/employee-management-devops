@@ -1,0 +1,38 @@
+---
+# Master Orchestration Playbook
+- name: Apply baseline configurations to all infrastructure nodes
+  hosts: all
+  become: yes
+  roles:
+    - common
+
+- name: Provision and configure MySQL database tier
+  hosts: db_servers
+  become: yes
+  roles:
+    - mysql
+
+- name: Provision Python runtime and application dependencies
+  hosts: app_servers
+  become: yes
+  roles:
+    - python
+    - app
+    - nginx
+
+- name: Verify application health across all application nodes
+  hosts: app_servers
+  tasks:
+    - name: Probe local /health endpoint
+      uri:
+        url: "http://127.0.0.1:5000/health"
+        status_code: 200
+        return_content: yes
+      register: health_result
+      retries: 5
+      delay: 3
+      until: health_result.status == 200
+
+    - name: Display health verification output
+      debug:
+        msg: "Host {{ inventory_hostname }} reported healthy status: {{ health_result.json.status }}"

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Department Management{% endblock %}
+{% block page_title %}Department Management{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('department.add') }}" class="btn btn-primary btn-sm">
+  <i class="fa-solid fa-plus me-1"></i> Add Department
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  {% for dept in departments %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card content-card h-100 p-4 d-flex flex-column justify-content-between">
+      <div>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-2 py-1 fw-bold">{{ dept.code }}</span>
+          <span class="text-muted small"><i class="fa-solid fa-users me-1"></i> {{ dept.employee_count }} staff</span>
+        </div>
+        <h4 class="fw-bold text-dark mt-2 mb-1">{{ dept.name }}</h4>
+        <p class="text-muted small mb-3">{{ dept.description or 'No description provided.' }}</p>
+      </div>
+
+      <div class="border-top pt-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small">Annual Budget:</span>
+          <span class="fw-bold text-dark">${{ "{:,.2f}".format(dept.budget) }}</span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{{ url_for('employee.index', department_id=dept.id) }}" class="btn btn-sm btn-outline-secondary" title="View Employees">
+            <i class="fa-solid fa-eye me-1"></i> View Staff
+          </a>
+          <a href="{{ url_for('department.edit', department_id=dept.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Department">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </a>
+          <form action="{{ url_for('department.delete', department_id=dept.id) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm-delete data-confirm-name="{{ dept.name }} Department" title="Delete Department">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="card content-card text-center py-5">
+      <i class="fa-solid fa-building-circle-xmark fs-1 text-secondary mb-3"></i>
+      <h5 class="text-muted">No departments configured yet.</h5>
+      <div class="mt-2">
+        <a href="{{ url_for('department.add') }}" class="btn btn-primary btn-sm">Create First Department</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

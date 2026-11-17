@@ -1,0 +1,17 @@
+---
+- name: Install Python 3, venv, and build dependencies
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+      - libffi-dev
+      - libssl-dev
+    state: present
+
+- name: Upgrade pip to latest version
+  pip:
+    name: pip
+    state: latest
+    executable: pip3

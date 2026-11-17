@@ -1,0 +1,53 @@
+---
+- name: Ensure application root directory exists
+  file:
+    path: "{{ app_root_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Create Python virtual environment
+  command: python3 -m venv "{{ app_root_dir }}/venv"
+  args:
+    creates: "{{ app_root_dir }}/venv/bin/activate"
+
+- name: Deploy application environment variables (.env)
+  template:
+    src: env.j2
+    dest: "{{ app_root_dir }}/application/.env"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0600'
+  ignore_errors: yes
+
+- name: Install Python dependencies inside virtualenv
+  pip:
+    requirements: "{{ app_root_dir }}/application/requirements.txt"
+    virtualenv: "{{ app_root_dir }}/venv"
+
+- name: Deploy Systemd unit file for Gunicorn
+  template:
+    src: employee-app.service.j2
+    dest: /etc/systemd/system/employee-app.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Run database migrations and seeding
+  command: "{{ app_root_dir }}/venv/bin/python run.py seed"
+  args:
+    chdir: "{{ app_root_dir }}/application"
+  environment:
+    FLASK_ENV: "{{ flask_env }}"
+  run_once: true
+
+- name: Start and enable employee-app systemd service
+  service:
+    name: employee-app
+    state: restarted
+    enabled: yes
