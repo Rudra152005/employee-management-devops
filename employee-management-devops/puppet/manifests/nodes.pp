@@ -2,7 +2,7 @@
 
 # Base class applied to all nodes in the infrastructure
 class base_node {
-  package { ['chrony', 'sudo', 'ufw', 'fail2ban']:
+  package { ['chrony', 'sudo', 'ufw']:
     ensure => installed,
   }
 
@@ -14,18 +14,24 @@ class base_node {
   }
 }
 
-# Application Servers classification (matches app-server-01, app-01.internal, etc.)
-node /^app.*\.internal$/ {
+# Node 1: Web Server 01 (Runs Application + MySQL DB)
+node /.*(172\.31\.41\.56|web-01|ip-172-31-41-56).*/ {
+  include base_node
+  include db_server
+  include app_server
+
+  notify { "Configuring Primary Web & Database Node: ${::fqdn}": }
+}
+
+# Node 2: Web Server 02 (Runs Application)
+node /.*(172\.31\.44\.210|web-02|ip-172-31-44-210).*/ {
   include base_node
   include app_server
 
-  notify { "Configuring Application Node: ${::fqdn}": }
+  notify { "Configuring Secondary Web Node: ${::fqdn}": }
 }
 
-# Database Servers classification (matches db-server-01, db-01.internal, etc.)
-node /^db.*\.internal$/ {
+# Fallback node classification
+node default {
   include base_node
-  include db_server
-
-  notify { "Configuring Database Node: ${::fqdn}": }
 }

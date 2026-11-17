@@ -7,6 +7,14 @@
     group: "{{ app_group }}"
     mode: '0755'
 
+- name: Copy application source code to server
+  copy:
+    src: "{{ playbook_dir }}/../../application/"
+    dest: "{{ app_root_dir }}/application/"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
 - name: Create Python virtual environment
   command: python3 -m venv "{{ app_root_dir }}/venv"
   args:
@@ -18,8 +26,7 @@
     dest: "{{ app_root_dir }}/application/.env"
     owner: "{{ app_user }}"
     group: "{{ app_group }}"
-    mode: '0600'
-  ignore_errors: yes
+    mode: '0644'
 
 - name: Install Python dependencies inside virtualenv
   pip:

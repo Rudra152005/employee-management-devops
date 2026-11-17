@@ -30,5 +30,5 @@
 - name: Ensure Nginx is running and enabled
   service:
     name: nginx
-    state: reloaded
+    state: restarted
     enabled: yes
